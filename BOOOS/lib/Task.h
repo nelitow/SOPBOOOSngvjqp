@@ -16,9 +16,14 @@
 namespace BOOOS {
 
 class Task {
+	friend class Scheduler;
 public:
+	static int _count;
+	static int count() {
+		return _count;
+	}
 	enum State {
-		READY, WAITING, RUNNING, FINISHING
+		READY, WAITING, RUNNING, FINISHING, SCHEDULER
 	};
 	static int __tid_counter;
 
@@ -42,8 +47,7 @@ public:
 	static Task * self() {
 		return (Task*) __running;
 	}
-	static void init()
-	;
+	static void init();
 
 private:
 	Task();
@@ -51,11 +55,12 @@ private:
 
 	static volatile Task * __running;
 	static Task* __main;
-	static std::queue<Task*> __ready;
 
 	int _tid;
 	ucontext_t _context;
 	char* _stack;
+protected:
+	static std::queue<Task*> __ready;
 	State _state;
 };
 
