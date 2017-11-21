@@ -26,6 +26,11 @@ Task::Task(void (*entry_point)(void*), int nargs, void * arg) {
 	_count++;
 }
 
+Task::Task(int prio, void (*entry_point)(void*), int nargs, void * arg) : Task(entry_point, nargs, arg)
+{
+	_priority = prio;
+}
+
 Task::Task() {
 	this->_stack = 0;
 	getcontext(&_context);

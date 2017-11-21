@@ -28,6 +28,7 @@ public:
 	static int __tid_counter;
 
 	Task(void (*entry_point)(void*), int nargs, void * arg);
+	Task(int prio, void (*entry_point)(void*), int nargs, void * arg);
 	virtual ~Task();
 
 	int tid() {
