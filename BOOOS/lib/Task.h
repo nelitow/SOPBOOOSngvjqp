@@ -28,7 +28,7 @@ public:
 	static int __tid_counter;
 
 	Task(void (*entry_point)(void*), int nargs, void * arg);
-	Task(int prio, void (*entry_point)(void*), int nargs, void * arg);
+	Task(int priority, void (*entry_point)(void*), int nargs, void * arg);
 	virtual ~Task();
 
 	int tid() {
@@ -49,7 +49,22 @@ public:
 		return (Task*) __running;
 	}
 	static void init();
-
+	class comparator {
+	public:
+		bool operator()(Task* lhs, Task* rhs) const {
+			if (lhs->_priority == rhs->_priority) {
+				if (lhs->_tid == 0) {
+					return true;
+				} else if (rhs->_tid == 0) {
+					return false;
+				} else {
+					return lhs->_tid > rhs->_tid;
+				}
+			} else {
+				return lhs->_priority > rhs->_priority;
+			}
+		}
+	};
 private:
 	Task();
 	static const int STACK_SIZE = 32768;
@@ -63,6 +78,8 @@ private:
 protected:
 	static std::queue<Task*> __ready;
 	State _state;
+	int _priority;
+	static std::priority_queue<Task*, std::vector<Task*>, comparator> _priority_queue;
 };
 
 } /* namespace BOOOS */

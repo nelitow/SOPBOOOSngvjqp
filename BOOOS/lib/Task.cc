@@ -1,5 +1,6 @@
 #include "Task.h"
 #include "Scheduler.h"
+#include <queue>
 
 namespace BOOOS {
 
@@ -26,9 +27,38 @@ Task::Task(void (*entry_point)(void*), int nargs, void * arg) {
 	_count++;
 }
 
-Task::Task(int prio, void (*entry_point)(void*), int nargs, void * arg) : Task(entry_point, nargs, arg)
-{
-	_priority = prio;
+Task::Task(int priority, void (*entry_point)(void*), int nargs, void * arg) :
+		Task(entry_point, nargs, arg) {
+	_priority = priority;
+}
+
+void Task::nice(int priority) {
+	this->_priority = this->_priority - priority;
+
+	if (_priority < -20) {
+		_priority = -20;
+	}
+
+	if (_priority > 19) {
+		_priority = 19;
+
+	}
+	queue<Task*> aux;
+
+	while (_priority_queue.size()) {
+		Task * aTask = _priority_queue.top();
+		aux.push(aTask);
+		_priority_queue.pop();
+	}
+
+	while (aux.size()) {
+		Task * aTask = aux.front();
+		_priority_queue.push(aTask);
+		aux.pop();
+
+	}
+	self()->yield();
+
 }
 
 Task::Task() {
