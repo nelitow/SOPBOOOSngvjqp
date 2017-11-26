@@ -1,10 +1,3 @@
-/*
- * Task.h
- *
- *  Created on: Aug 15, 2014
- *      Author: arliones
- */
-
 #ifndef TASK_H_
 #define TASK_H_
 
@@ -12,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ucontext.h>
+
+
 
 namespace BOOOS {
 

@@ -1,6 +1,9 @@
 #include "Scheduler.h"
 #include <iostream>
 #include "Task.h"
+#include "BOOOS.h"
+
+using namespace std;
 
 namespace BOOOS {
 
@@ -32,8 +35,16 @@ void Scheduler::dispatcher(void*) {
 }
 
 Task * Scheduler::choose_next() {
-	Task * next = __ready.front();
-	__ready.pop();
+	Task * next;
+	if (BOOOS::BOOOS::SCHED_POLICY == BOOOS::BOOOS::SCHED_FCFS) {
+		next = __ready.front();
+		__ready.pop();
+	}
+	if (BOOOS::SCHED_POLICY == BOOOS::SCHED_PRIORITY) {
+		next = _priority_queue.top();
+		_priority_queue.pop();
+
+	}
 	return next;
 }
 

@@ -1,6 +1,12 @@
 #include "Task.h"
-#include "Scheduler.h"
+#include <stdio.h>
 #include <queue>
+#include <cstdlib>
+#include <Scheduler.h>
+#include "BOOOS.h"
+#include <iostream>
+
+using namespace std;
 
 namespace BOOOS {
 
@@ -9,6 +15,7 @@ Task * Task::__main;
 int Task::__tid_counter;
 int Task::_count = 0;
 const int Task::STACK_SIZE;
+priority_queue<Task*, std::vector<Task*>, Task::comparator> Task::_priority_queue;
 std::queue<Task*> Task::__ready;
 
 Task::Task(void (*entry_point)(void*), int nargs, void * arg) {
@@ -30,35 +37,47 @@ Task::Task(void (*entry_point)(void*), int nargs, void * arg) {
 Task::Task(int priority, void (*entry_point)(void*), int nargs, void * arg) :
 		Task(entry_point, nargs, arg) {
 	_priority = priority;
+
+	getcontext(&this->_context);
+	_stack = (char*) malloc(STACK_SIZE);
+	if (_stack) {
+		this->_context.uc_stack.ss_sp = _stack;
+		this->_context.uc_stack.ss_size = STACK_SIZE;
+		this->_context.uc_stack.ss_flags = 0;
+		this->_context.uc_link = (ucontext*) -1;
+	}
+	makecontext(&this->_context, (void (*)()) entry_point, nargs, arg);
+	this->_tid = __tid_counter++;
+	this->_state = READY;
+	__ready.push(this);
+	_count++;
 }
 
 void Task::nice(int priority) {
-	this->_priority = this->_priority - priority;
+	_priority = _priority - priority;
 
-	if (_priority < -20) {
+	if (_priority < -20)
 		_priority = -20;
-	}
 
-	if (_priority > 19) {
-		_priority = 19;
+	if (_priority >= 20)
+		_priority = 20;
 
-	}
-	queue<Task*> aux;
+	static std::priority_queue<Task*, std::vector<Task*>, comparator> rearrange_queue;
+	Task * Task_t;
 
-	while (_priority_queue.size()) {
-		Task * aTask = _priority_queue.top();
-		aux.push(aTask);
+	while (!_priority_queue.empty()) {
+		Task_t = _priority_queue.top();
+		rearrange_queue.push(Task_t);
 		_priority_queue.pop();
 	}
 
-	while (aux.size()) {
-		Task * aTask = aux.front();
-		_priority_queue.push(aTask);
-		aux.pop();
+	while (!rearrange_queue.empty()) {
+		Task_t = rearrange_queue.top();
+		_priority_queue.push(Task_t);
+		rearrange_queue.pop();
 
 	}
 	self()->yield();
-
 }
 
 Task::Task() {
